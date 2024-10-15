@@ -1,3 +1,19 @@
+# Project Setup
+
+1. Start the development server:
+
+   ```bash
+
+    npm install 
+   npm run dev
+   # Project Setup
+
+1. Start the backend server:
+
+   ```bash
+   cd socketserver
+   npm install
+   npm start
 # Collaborative Coding Platform
 
 Welcome to our Collaborative Coding Platform! This project is a robust tool designed to facilitate real-time coding collaboration among developers using Next.js, Express.js, MongoDB, TypeScript, WebSocket, Webpack, and deployed on Amazon Web Services (AWS).
