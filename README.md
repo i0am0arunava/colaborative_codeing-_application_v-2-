@@ -4,7 +4,7 @@
 
    ```bash
 
-    npm install 
+   npm install 
    npm run dev
    # Project Setup
 
