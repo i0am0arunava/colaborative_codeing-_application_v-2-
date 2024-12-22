@@ -51,6 +51,6 @@ To get the project up and running on your local machine, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/i0am0arunava/colaborative-coding-application.git
+   git clone https://github.com/i0am0arunava/colaborative_codeing-_application_v-2-.git
 2. **npm install**
 3. **npm run dev**:
