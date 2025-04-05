@@ -44,6 +44,7 @@ import { SiCodesignal } from "react-icons/si";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Romanesco } from "next/font/google";
+import { join } from "path";
 const drawerWidth = 380;
 
 const Main = styled("main", { shouldForwardProp: (prop) => prop !== "open" })<{
@@ -172,7 +173,7 @@ const [uname,setname]=useState("")
     console.log("user", user);
 
     console.log("user adding ....");
-    socket.current!.emit("add-user", roomID);
+    socket.current!.emit("add-user", roomID,uname);
   }, [roomID]);
 
   useEffect(() => {
@@ -232,7 +233,8 @@ const [uname,setname]=useState("")
       console.log("room added", roomID);
       // Emit room join/create event to the server
       socket.current!.emit("join-room", roomInput);
-
+  const joinroom=new Audio("join.mp3");
+  
       toast.success("Share this roomid to your friend !", {
         position: "top-center",
         autoClose: 2000,
@@ -242,6 +244,9 @@ const [uname,setname]=useState("")
         draggable: true,
         progress: undefined,
         theme: "colored",
+      });
+      joinroom.play().catch((err) => {
+        console.error("Failed to play leave sound:", err);
       });
       toggleDialog();
     }
@@ -265,7 +270,7 @@ const [uname,setname]=useState("")
   }, []);
 console.log('uname',uname)
   const leave = () => {
-    socket.current?.emit("leave-room", roomID);
+    socket.current?.emit("leave-room", roomID,uname);
     localStorage.removeItem("roomID");
     setRoomID(""); // Clear the roomID state
     // Notify the server that the user is leaving the room
@@ -295,7 +300,12 @@ console.log('uname',uname)
   }, [])
 
   useEffect(() => {
-    socket.current?.on("userleft", (val) => {
+    socket.current?.on("userleft", (val,online) => {
+      const leaveSound = new Audio("/leave.mp3");
+
+    
+  setAllUsers(online)
+    
       if (typeof (val) == "undefined") {
         val = "you"
       }
@@ -308,6 +318,9 @@ console.log('uname',uname)
         draggable: true,
         progress: undefined,
         theme: "colored",
+      });
+      leaveSound.play().catch((err) => {
+        console.error("Failed to play leave sound:", err);
       });
 
     })
@@ -423,8 +436,23 @@ const handleEditorChange = () => {
     }
   }
 };
+const [allUsers, setAllUsers] = useState<[string, string[]][]>([]);
 
 
+useEffect(() => {
+  socket.current?.on("all-online-users", (users) => {
+    setAllUsers(users);
+
+  });
+
+  return () => {
+    socket.current?.off("all-online-users");
+  };
+}, []);
+
+console.log("ww",allUsers);
+const matchedRoom = allUsers?.find(item => item[0] === roomID);
+const roomUsers = matchedRoom ? matchedRoom[1] : [];
 
   return (
     <>
@@ -496,10 +524,26 @@ const handleEditorChange = () => {
           <List>
             <div className="helloww">MY GROUP </div>
             <div className="myonline">
-              <div className="o1">
-                <p className="mainp">AP</p>
-                <p className="ph">arun</p>
+            
+               
+                {roomUsers.map((user, index) => (
+<>
+<div className="o1">
+<p className="mainp">
+      {user.charAt(0).toUpperCase() + user.charAt(user.length - 1).toUpperCase()}
+    </p>
+                <p className="ph">{uname === user ? "you" : user}</p>
               </div>
+</>
+    ))}
+              </div>
+          
+          </List>
+          <Divider />
+          <List>
+            <div className="helloww">OTHER USERS </div>
+            <div className="myonline">
+             
               <div className="o2">
                 <p className="mainp">PD</p>
                 <p className="ph">pranay</p>
@@ -520,31 +564,9 @@ const handleEditorChange = () => {
                 <p className="mainp">PY</p>
                 <p className="ph">rehan</p>
               </div>
-            </div>
-          </List>
-          <Divider />
-          <List>
-            <div className="helloww">OTHER USERS </div>
-            <div className="myonline">
-              <div className="o1">
-                <p className="mainp">AP</p>
-                <p className="ph">arun</p>
-              </div>
-              <div className="o2">
-                <p className="mainp">PD</p>
-                <p className="ph">pranay</p>
-              </div>
-              <div className="o3">
-                <p className="mainp">KS</p>
-                <p className="ph">krish</p>
-              </div>
-              <div className="o4">
-                <p className="mainp">SP</p>
-                <p className="ph">sumit</p>
-              </div>
-              <div className="o5">
-                <p className="mainp">JP</p>
-                <p className="ph">jehan</p>
+              <div className="o6">
+                <p className="mainp">PY</p>
+                <p className="ph">rehan</p>
               </div>
               <div className="o6">
                 <p className="mainp">PY</p>

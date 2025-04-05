@@ -17,6 +17,7 @@ const io = socket(server, {
 });
 
 global.onlineUsers = new Map();
+global.online = new Map();
 global.a = [];
 io.on("connection", (socket) => {
   global.chatSocket = socket;
@@ -29,17 +30,20 @@ io.on("connection", (socket) => {
 
 
 
-  socket.on("add-user", (roomId) => {
+  socket.on("add-user", (roomId,uname) => {
     console.log("rrr", roomId.length == 0)
     if (roomId.length != 0) {
       addValueToMap(onlineUsers, roomId, socket.id);
-
+      addValueToMap(online, roomId,uname);
+io.emit("all-online-users",[...online]);
+      console.log("fgfg",online)
       global.a = onlineUsers.get(roomId)
 
       if (global.a) {
         global.a.forEach((sId) => {
           if (sId) {
-            socket.to(sId).emit("contact", 321);
+            socket.to(sId).emit("contact", uname);
+        
           }
         });
       }
@@ -58,15 +62,26 @@ io.on("connection", (socket) => {
   }
 
 
-  socket.on("leave-room", (roomId) => {
+  socket.on("leave-room", (roomId,uname) => {
     removeUserFromRooms(socket.id);
-    socket.emit("userleft")
-    global.a = onlineUsers.get(roomId)
 
+
+    socket.emit("userleft")
+    console.log("uname", uname)
+    global.a = onlineUsers.get(roomId)
+    online.forEach((names, key) => {
+      online.set(key, names.filter(name => name !== uname));
+      // Clean up empty lists
+      if (online.get(key).length === 0) {
+        online.delete(key);
+      }
+    });
+    
+    console.log("online", online)
     if (global.a) {
       global.a.forEach((sId) => {
         if (sId) {
-          socket.to(sId).emit("userleft", 321);
+          socket.to(sId).emit("userleft", uname,[...online]);
         }
       });
     }
